@@ -173,7 +173,7 @@ pyth.getRequest = (requestId)=>{
 
 pyth.addResponse = (request,response)=>{
   if(pyth.config.DEBUG) console.log("Adding response to request id \""+request+"\": "+response)
-  return pyth.contracts["Responses"].interface.methods.addResponse(request,response).send({
+  return pyth.contracts["Responses"].interface.methods.addResponse(request,pyth.web3.utils.fromAscii(response)).send({
     from: pyth.selectedAddress,
     gas: pyth.gas,
     gasPrice: pyth.web3.utils.toWei(pyth.gasPrice,'gwei')
@@ -185,6 +185,10 @@ pyth.listResponses = (id)=>{
       fromBlock: pyth.contracts["Requests"].blockNumber,
       toBlock: 'latest'
   })
+}
+
+pyth.getHead = (id)=>{
+  return pyth.contracts["Responses"].interface.methods.heads(id).call()
 }
 
 
