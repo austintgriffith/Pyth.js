@@ -1,10 +1,17 @@
+const fs = require("fs")
 
-let requestId = "0xf570c082d7e98e79b973942228bfd4ed17fba18abb20c2a1c54c478562854b04";
-let combinerAddress = "0xcDB53D826d2A6b0c525bC1475687d520B34EbDE9";
+if(!process.argv[2]){
+  console.log("Please provide a request id.")
+  process.exit(1)
+}
+let requestId = process.argv[2];
+let combinerAddress = fs.readFileSync("../../Combiner/basic/Combiner.address").toString().trim()
 
 require("../pyth.js")({DEBUG: true},(err,pyth)=>{
   pyth.combine(requestId,combinerAddress).then((result)=>{
-    console.log(pyth.contracts['Responses'].address)
-    console.log(pyth.web3.utils.toAscii(result))
+    console.log(result)
+    console.log(result.events.Debug)
+    //console.log(pyth.contracts['Responses'].address)
+    //console.log(pyth.web3.utils.toAscii(result))
   });
 });

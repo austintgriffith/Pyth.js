@@ -1,8 +1,10 @@
-
+const fs = require("fs")
 let request = {url: "http://localhost/"}
 let parser = {type:"raw"}
-let combiner = "0xD82327E25758191Ba91BC3b5755493D1F68e0E81"
+let combiner = fs.readFileSync("../../Combiner/basic/Combiner.address").toString().trim()
 let tokens = 5
+
+console.log("combiner @ "+combiner)
 
 require("../pyth.js")({DEBUG: true},(err,pyth)=>{
   pyth.selectAccount(1)
