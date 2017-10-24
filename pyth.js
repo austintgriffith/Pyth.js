@@ -15,7 +15,6 @@ let pyth = {
   gas: 200000,
   gasPrice: 22,
   contracts: [],
-  defaultCombiner:"0xF3dB0725228a10D2105fC606E2Dd1312814f3b9a",
   defaultParser: "raw",
   blocksPerRead: 10000,
 }
@@ -78,16 +77,24 @@ pyth.syncMineQueue = (interval) => {
   setTimeout(ResponsesToMineQueue,interval/5)
 }
 
+/*
+look through requests and find out if there are any responses yet
+particularly from this miner or many of them and then make a decision on
+whether or not to add it to the mineQueue
+*/
 function ResponsesToMineQueue(){
   for(let r in pyth.requests){
+    //console.log("Checking request ",pyth.requests[r])
     if( pyth.requests[r].reserved > 0){
-      console.log("FOUND a request "+pyth.requests[r].id+" with some coin...")
+      //console.log("FOUND a request "+pyth.requests[r].id+" with some coin...")
       pyth.listResponses(pyth.requests[r].id).then((responseEvents)=>{
         console.log("responseEvents",responseEvents)
-        if(responseEvents.length==0){
-          console.log("Mine",pyth.requests[r])
+        if(responseEvents.length==0){////right now we only respond to empty requests
+                  //but later you'll want to check 1) did I respond 2) how many people responded 3) what is the total staked response
           if(!pyth.mineQueue) pyth.mineQueue = [];
-          if(!pyth.mineQueue[pyth.requests[r].id]) pyth.mineQueue[pyth.requests[r].id] = pyth.requests[r];
+          if(!pyth.mineQueue[pyth.requests[r].id]){
+            pyth.mineQueue[pyth.requests[r].id] = pyth.requests[r];
+          }
         }
       })
     }
@@ -141,8 +148,8 @@ pyth.reserve = (requestId,amount)=>{
 /// --- REQUESTS ------------------------------------------------------------------------
 
 pyth.addRequest = (request,parser,combiner)=>{
-  if(!combiner) combiner=pyth.defaultCombiner
-  if(!parser) parser=pyth.defaultParser
+  request=JSON.stringify(request)
+  parser=JSON.stringify(parser)
   if(pyth.config.DEBUG) console.log("Creating request \""+request+"\" parsed with \""+parser+"\" to combiner "+combiner)
   return pyth.contracts["Requests"].interface.methods.addRequest(combiner,request,parser).send({
     from: pyth.selectedAddress,
@@ -164,12 +171,42 @@ pyth.getRequest = (requestId)=>{
 
 /// --- RESPONSE ------------------------------------------------------------------------
 
+pyth.addResponse = (request,response)=>{
+  if(pyth.config.DEBUG) console.log("Adding response to request id \""+request+"\": "+response)
+  return pyth.contracts["Responses"].interface.methods.addResponse(request,response).send({
+    from: pyth.selectedAddress,
+    gas: pyth.gas,
+    gasPrice: pyth.web3.utils.toWei(pyth.gasPrice,'gwei')
+  })
+}
+
 pyth.listResponses = (id)=>{
   return pyth.contracts["Responses"].interface.getPastEvents({id:id},{ //you could probably even filter down to the selectedAddress
       fromBlock: pyth.contracts["Requests"].blockNumber,
       toBlock: 'latest'
   })
 }
+
+
+/// --- COMBINER ------------------------------------------------------------------------
+
+
+pyth.combine = (id,address)=>{
+  /*return pyth.contracts["Co"].interface.getPastEvents({id:id},{ //you could probably even filter down to the selectedAddress
+      fromBlock: pyth.contracts["Requests"].blockNumber,
+      toBlock: 'latest'
+  })*/
+  if(pyth.config.DEBUG) console.log("Loading Combiner "+address)
+
+  //combiner abi should probably be hardcoded in software, the should all be exactly the same
+  try{
+    let combinerAbi = JSON.parse(fs.readFileSync("../../Combiner/basic/Combiner.abi").toString().trim())
+    let combinerContract = new pyth.web3.eth.Contract(combinerAbi,address)
+    return combinerContract.methods.combine(id).call()
+  }catch(e){console.log(e)}
+
+}
+
 
 /// --- HELPERS ------------------------------------------------------------------------
 
