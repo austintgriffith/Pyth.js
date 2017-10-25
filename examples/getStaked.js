@@ -1,12 +1,21 @@
-const Request = require('request');
-let responseId = "0xfa6df6e4892eb6a2e272d3deafe1ddd1161bdf8f830ff446725a440d5c37b6ff"
+if(!process.argv[2]){
+  console.log("Please provide a request id.")
+  process.exit(1)
+}
+let requestId = process.argv[2];
+
+if(!process.argv[3]){
+  console.log("Please provide a response id.")
+  process.exit(1)
+}
+let responseId = process.argv[3];
 
 require("../pyth.js")({DEBUG: true},(err,pyth)=>{
 
   pyth.selectAccount(1)
 
-  pyth.staked(pyth.selectedAddress,responseId).then((staked)=>{
-    console.log("Account "+pyth.selectedAddress+" has "+staked+" PTH staked on response "+responseId)
+  pyth.staked(pyth.selectedAddress,requestId,responseId).then((staked)=>{
+    console.log("Account "+pyth.selectedAddress+" has "+staked+" PTH staked on response "+responseId+" to request "+requestId)
   })
 
 });

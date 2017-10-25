@@ -1,5 +1,9 @@
 
-let requestId = "0xc37629d5d280cc97b202f8e833eb741a70923880b2f78793225613133cba22ed"
+if(!process.argv[2]){
+  console.log("Please provide a request id.")
+  process.exit(1)
+}
+let requestId = process.argv[2];
 
 require("../pyth.js")({DEBUG: true},(err,pyth)=>{
   pyth.reserved(requestId).then((reserved)=>{

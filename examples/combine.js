@@ -11,7 +11,7 @@ require("../pyth.js")({DEBUG: true},(err,pyth)=>{
   pyth.combine(requestId,combinerAddress).then((result)=>{
     console.log(result)
     console.log(result.events.Debug)
-    //console.log(pyth.contracts['Responses'].address)
-    //console.log(pyth.web3.utils.toAscii(result))
+    console.log(result.events.DebugGas)
+    console.log(result.events.DebugPointer)
   });
 });

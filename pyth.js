@@ -17,8 +17,13 @@ let pyth = {
   gasPrice: 22,
   contracts: [],
   combinerContracts: [],
+  blacklist: [],
   defaultParser: "raw",
   blocksPerRead: 10000,
+  AMOUNT_TO_STAKE: 1,
+  DEBUG_MINER: false,
+  DEBUG_COMBINE: true,
+  BUSY: false
 }
 
 
@@ -56,58 +61,62 @@ module.exports = function(config,callback){
 
 }
 
+/// --- MINER ------------------------------------------------------------------------
+
+pyth.startMining = (interval) => {
+  if(!interval) interval=5000;
+  pyth.syncRequests(interval)
+  pyth.syncReserved(interval)
+  pyth.syncMineQueue(interval)
+  pyth.syncCombineQueue(interval)
+  //mine interval
+  setInterval(()=>{
+    if(!pyth.BUSY){
+      if(pyth.config.DEBUG) console.log("#*")
+      for(let i in pyth.mineQueue){
+        let requestToMine = pyth.mineQueue[i]
+        if(pyth.config.DEBUG) console.log("#* MINE REQUEST: "+requestToMine+"")
+        pyth.BUSY = requestToMine
+        mineRequest(pyth.BUSY)
+        break
+      }
+    }
+  },interval)
+  //combine interval
+  setInterval(()=>{
+    if(!pyth.BUSY){
+      if(pyth.config.DEBUG) console.log("#%")
+      for(let i in pyth.combineQueue){
+        let requestToCombine = pyth.combineQueue[i]
+        if(pyth.config.DEBUG) console.log("#% COMBINE REQUEST: "+requestToCombine+"")
+        pyth.BUSY = requestToCombine
+        combineRequest(pyth.BUSY)
+        break
+      }
+    }
+  },interval)
+}
 
 
 /// --- INTERVALS ------------------------------------------------------------------------
 
 pyth.syncRequests = (interval) => {
-  if(!interval) interval=18000
   setInterval(checkForNewRequests,interval)
   checkForNewRequests()
 }
-
 pyth.syncReserved = (interval) => {
-  if(!interval) interval=15000
   setInterval(checkForReserved,interval)
-  setTimeout(checkForReserved,interval/10)
+  setTimeout(checkForReserved,interval/3)
 }
-
-
 pyth.syncMineQueue = (interval) => {
-  if(!interval) interval=16000
   setInterval(ResponsesToMineQueue,interval)
   setTimeout(ResponsesToMineQueue,interval/5)
 }
-
-/*
-look through requests and find out if there are any responses yet
-particularly from this miner or many of them and then make a decision on
-whether or not to add it to the mineQueue
-*/
-function ResponsesToMineQueue(){
-  for(let r in pyth.requests){
-    if( pyth.requests[r].reserved > 0){
-      //console.log(" >> FOUND a request "+r+" with some coin...")
-      pyth.listResponses(r).then((responseEvents)=>{
-        let foundMyAddressInResponses = false
-        for(let r in responseEvents){
-          if(responseEvents[r].returnValues.sender == pyth.selectedAddress) {
-            foundMyAddressInResponses = true;
-            break;
-          }
-        }
-        if(responseEvents.length==0 || !foundMyAddressInResponses){
-          if(!pyth.mineQueue) {pyth.mineQueue = [];}
-          if(pyth.mineQueue.indexOf(r)<0){
-            pyth.mineQueue.push(r)
-          }
-        }
-      })
-    }else{
-      //console.log(" >> request "+r+" has no tokens reserved")
-    }
-  }
+pyth.syncCombineQueue = (interval) => {
+  setInterval(CombinerReadyQueue,interval)
+  setTimeout(CombinerReadyQueue,interval/7)
 }
+
 
 /// --- ACCOUNT ------------------------------------------------------------------------
 
@@ -198,6 +207,12 @@ pyth.getRequest = (requestId)=>{
   return pyth.contracts["Requests"].interface.methods.getRequest(requestId).call()
 }
 
+pyth.getCombiner = (requestId)=>{
+  return pyth.contracts["Requests"].interface.methods.getCombiner(requestId).call()
+}
+
+
+
 /// --- RESPONSE ------------------------------------------------------------------------
 
 pyth.addResponse = (request,response)=>{
@@ -217,6 +232,9 @@ pyth.listResponses = (id)=>{
   })
 }
 
+pyth.getResponse = (responseId)=>{
+  return pyth.contracts["Responses"].interface.methods.getResponse(responseId).call()
+}
 
 pyth.getHead = (id)=>{
   return pyth.contracts["Responses"].interface.methods.heads(id).call()
@@ -240,6 +258,46 @@ pyth.getCombinerMostStaked = (requestid,address)=>{
   return pyth.combinerContracts[address].methods.mostStaked(requestid).call()
 }
 
+pyth.isCombinerOpen = (requestid,address) => {
+  if(!pyth.combinerContracts[address]) loadCombiner(address)
+  return pyth.combinerContracts[address].methods.open(requestid).call()
+}
+
+pyth.isCombinerReady = (requestid,address) => {
+  if(!pyth.combinerContracts[address]) loadCombiner(address)
+  return pyth.combinerContracts[address].methods.ready(requestid).call()
+}
+
+pyth.mineReport = ()=>{}
+
+function combineRequest(requestId){
+  if(pyth.DEBUG_COMBINE) console.log(" # ### COMBINE request "+requestId)
+  try{
+    pyth.combine(requestId,pyth.requests[requestId].combiner).on('error',(err)=>{
+      console.log("ERROR",err)
+        pyth.blacklist.push(requestId)
+      clearRequestOutOfCombineQueue(requestId)
+    }).then((result)=>{
+      if(pyth.DEBUG_COMBINE) console.log(" ### COMBINE BACK:",result.transactionHash)
+      if(pyth.DEBUG_COMBINE){
+        fs.writeFileSync("debug/"+result.transactionHash,JSON.stringify(result.events))
+         console.log(" ### COMBINE EVENTS WRITTEN TO FILE")
+      }
+      clearRequestOutOfCombineQueue(requestId)
+    })
+  }catch(e){console.log(e);console.log("SETTING BUSY TO FALSE:");pyth.BUSY=false;}
+}
+
+function clearRequestOutOfCombineQueue(requestId){
+  for(let i in pyth.combineQueue){
+    if(pyth.combineQueue[i]==requestId){
+      pyth.combineQueue.splice(i, 1)
+      break
+    }
+  }
+  pyth.BUSY=false;
+  return;
+}
 
 pyth.combine = (requestid,address)=>{
   if(!pyth.combinerContracts[address]) loadCombiner(address)
@@ -279,6 +337,108 @@ function loadCombiner(address){
 
 
 /// --- HELPERS ------------------------------------------------------------------------
+
+/*
+look through requests and find out if any of them are ready for the combiner to run
+*/
+function CombinerReadyQueue(){
+  for(let r in pyth.requests){
+    if( pyth.requests[r].reserved > 0){
+
+      //first, check to see if the combiner is
+
+      //second, check to see if the combiner is ready to combine
+      pyth.isCombinerReady(r,pyth.requests[r].combiner).then((ready)=>{
+        //console.log(" >> combiner ready: ",ready)
+        if(ready){
+          if(pyth.blacklist.indexOf(r)<0){
+            if(!pyth.combineQueue) {pyth.combineQueue = [];}
+            if(pyth.combineQueue.indexOf(r)<0){
+              //console.log("!!!!!! PUSH")
+              pyth.combineQueue.push(r)
+            }
+          }
+        }
+      })
+
+
+    }
+  }
+}
+
+/*
+look through requests and find out if there are any responses yet
+particularly from this miner or many of them and then make a decision on
+whether or not to add it to the mineQueue
+*/
+function ResponsesToMineQueue(){
+  for(let r in pyth.requests){
+    if( pyth.requests[r].reserved > 0){
+      //console.log(" >> FOUND a request "+r+" with some coin...")
+      pyth.listResponses(r).then((responseEvents)=>{
+        let foundMyAddressInResponses = false
+        for(let r in responseEvents){
+          if(responseEvents[r].returnValues.sender == pyth.selectedAddress) {
+            foundMyAddressInResponses = true;
+            break;
+          }
+        }
+        if(responseEvents.length==0 || !foundMyAddressInResponses){
+          if(!pyth.mineQueue) {pyth.mineQueue = [];}
+          if(pyth.mineQueue.indexOf(r)<0){
+            pyth.mineQueue.push(r)
+          }
+        }
+      })
+    }else{
+      //console.log(" >> request "+r+" has no tokens reserved")
+    }
+  }
+}
+
+
+
+
+function mineRequest(requestId){
+  if(pyth.DEBUG_MINER) console.log(" # ### MINING request "+requestId)
+  try{
+    let request = JSON.parse(pyth.requests[requestId].request);
+    let parser = JSON.parse(pyth.requests[requestId].parser)
+    if(pyth.config.DEBUG) console.log(" ## URL: "+request.url)
+    Request(request.url,(error, response, body)=>{
+      if(pyth.DEBUG_MINER) console.log(body);
+      pyth.addResponse(requestId,body).on('error',(err)=>{
+        console.log("ERROR",err)
+        pyth.blacklist.push(requestId)
+        clearRequestOutOfMineQueue(requestId)
+      }).then((result)=>{
+        if(pyth.DEBUG_MINER) console.log(result)
+        if(pyth.DEBUG_MINER) console.log(" ## RETURNED:",result.events.AddResponse.returnValues)
+        let responseId = result.events.AddResponse.returnValues.id
+        if(pyth.DEBUG_MINER) console.log(" ## RESPONSE ID: "+responseId)
+        pyth.stake(requestId,responseId,pyth.AMOUNT_TO_STAKE).on('error',(err)=>{
+          console.log("ERROR",err)
+          pyth.blacklist.push(requestId)
+          clearRequestOutOfMineQueue(requestId)
+        }).then((result)=>{
+          if(pyth.DEBUG_MINER) console.log(result)
+          clearRequestOutOfMineQueue(requestId)
+        })
+      })
+    });
+  }catch(e){console.log(e);pyth.BUSY=false;}
+}
+
+function clearRequestOutOfMineQueue(requestId){
+  for(let i in pyth.mineQueue){
+    if(pyth.mineQueue[i]==requestId){
+      pyth.mineQueue.splice(i, 1)
+      break
+    }
+  }
+  pyth.BUSY=false;
+}
+
 
 function checkForReserved(){
   for(let id in pyth.requests) {
@@ -321,6 +481,12 @@ function getAccounts(){
 }
 
 function initStorage(){
+  try{
+    if (!fs.existsSync("debug")){
+      fs.mkdirSync("debug");
+    }
+  }catch(e){}
+
   try{fs.mkdirSync(pyth.storage)}catch(e){}
   try{fs.mkdirSync(pyth.storage+"abis")}catch(e){}
 }

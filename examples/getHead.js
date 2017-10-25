@@ -5,7 +5,7 @@ if(!process.argv[2]){
 let requestId = process.argv[2];
 
 require("../pyth.js")({DEBUG: true},(err,pyth)=>{
-  pyth.getRequest(requestId).then((request)=>{
-    console.log(request)
+  pyth.getHead(requestId).then((head)=>{
+    console.log(head)
   })
 });
