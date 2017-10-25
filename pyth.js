@@ -20,7 +20,7 @@ let pyth = {
   blacklist: [],
   defaultParser: "raw",
   blocksPerRead: 10000,
-  AMOUNT_TO_STAKE: 1,
+  AMOUNT_TO_STAKE: 10,
   DEBUG_MINER: false,
   DEBUG_COMBINE: true,
   BUSY: false
