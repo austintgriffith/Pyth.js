@@ -1,8 +1,8 @@
 {
-  "name": "pyth.js",
+  "name": "concurrence.js",
   "version": "1.0.0",
-  "description": "Javascript library for interacting with Pyth.io Ethereum smart contract fleet",
-  "main": "pyth.js",
+  "description": "Javascript library for interacting with Concurrence smart contract fleet",
+  "main": "concurrence.js",
   "directories": {
     "example": "examples"
   },
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/austintgriffith/Pyth.js.git"
+    "url": "git+https://github.com/austintgriffith/concurrence.js.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/austintgriffith/Pyth.js/issues"
+    "url": "https://github.com/austintgriffith/concurrence.js/issues"
   },
-  "homepage": "https://github.com/austintgriffith/Pyth.js#readme",
+  "homepage": "https://github.com/austintgriffith/concurrence.js#readme",
   "dependencies": {
     "lodash": "^4.17.4",
     "net": "^1.0.2",
