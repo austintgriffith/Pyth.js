@@ -10,12 +10,12 @@ if(!process.argv[3]){
 }
 let responseId = process.argv[3];
 
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
 
-  pyth.selectAccount(1)
+  concurrence.selectAccount(1)
 
-  pyth.staked(pyth.selectedAddress,requestId,responseId).then((staked)=>{
-    console.log("Account "+pyth.selectedAddress+" has "+staked+" PTH staked on response "+responseId+" to request "+requestId)
+  concurrence.staked(concurrence.selectedAddress,requestId,responseId).then((staked)=>{
+    console.log("Account "+concurrence.selectedAddress+" has "+staked+" PTH staked on response "+responseId+" to request "+requestId)
   })
 
 });

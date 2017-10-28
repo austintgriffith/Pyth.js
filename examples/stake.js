@@ -22,11 +22,11 @@ if(!process.argv[5]){
 }
 let tokens = process.argv[5];
 
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
 
-  pyth.selectAccount(accountIndex)
+  concurrence.selectAccount(accountIndex)
 
-  pyth.stake (requestId,responseId,tokens).then((result)=>{
+  concurrence.stake (requestId,responseId,tokens).then((result)=>{
     console.log(result)
   })
 

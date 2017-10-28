@@ -4,10 +4,10 @@ if(!process.argv[2]){
 }
 let accountIndex = process.argv[2];
 
-require("../pyth.js")({},(err,pyth)=>{
-  console.log("Asking pyth.js what my (etherbase) balance is...")
-  pyth.selectAccount(accountIndex)
-  pyth.balanceOf().then((balance)=>{
-    console.log("Balance: "+balance+" "+pyth.symbol)
+require("../concurrence.js")({},(err,concurrence)=>{
+  console.log("Asking concurrence.js what my (etherbase) balance is...")
+  concurrence.selectAccount(accountIndex)
+  concurrence.balanceOf().then((balance)=>{
+    console.log("Balance: "+balance+" "+concurrence.symbol)
   })
 });

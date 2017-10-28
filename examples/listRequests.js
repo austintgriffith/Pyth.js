@@ -1,5 +1,5 @@
-require("../pyth.js")({},(err,pyth)=>{
-  pyth.listRequests().then((requests)=>{
+require("../concurrence.js")({},(err,concurrence)=>{
+  concurrence.listRequests().then((requests)=>{
     console.log(requests)
   })
 });

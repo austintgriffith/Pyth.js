@@ -12,9 +12,9 @@ if(!process.argv[3]){
 }
 let tokens = process.argv[3];
 
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
-  pyth.selectAccount(1)
-  pyth.reserve(requestId,tokens).then((reserveResult)=>{
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+  concurrence.selectAccount(1)
+  concurrence.reserve(requestId,tokens).then((reserveResult)=>{
     console.log(reserveResult)
   })
 });

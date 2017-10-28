@@ -5,8 +5,8 @@ if(!process.argv[2]){
 }
 let requestId = process.argv[2];
 
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
-  pyth.reserved(requestId).then((reserved)=>{
-    console.log("Request "+requestId+" has "+reserved+" "+pyth.symbol+" reserved")
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+  concurrence.reserved(requestId).then((reserved)=>{
+    console.log("Request "+requestId+" has "+reserved+" "+concurrence.symbol+" reserved")
   })
 });

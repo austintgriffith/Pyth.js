@@ -7,8 +7,8 @@ if(!process.argv[2]){
 let requestId = process.argv[2];
 let combinerAddress = fs.readFileSync("../../Combiner/basic/Combiner.address").toString().trim()
 
-require("../pyth.js")({},(err,pyth)=>{
-  pyth.isCombinerReady(requestId,combinerAddress).then((ready)=>{
+require("../concurrence.js")({},(err,concurrence)=>{
+  concurrence.isCombinerReady(requestId,combinerAddress).then((ready)=>{
     console.log("COMBINER READY: "+ready)
   })
 });

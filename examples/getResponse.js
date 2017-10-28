@@ -4,8 +4,8 @@ if(!process.argv[2]){
 }
 let responseId = process.argv[2];
 
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
-  pyth.getResponse(responseId).then((response)=>{
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+  concurrence.getResponse(responseId).then((response)=>{
     console.log(response)
   })
 });

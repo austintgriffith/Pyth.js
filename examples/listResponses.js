@@ -5,12 +5,12 @@ if(!process.argv[2]){
 }
 let requestId = process.argv[2];
 
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
 console.log("Listing responses with to request:"+requestId)
-  pyth.listResponses(requestId).then((responses)=>{
+  concurrence.listResponses(requestId).then((responses)=>{
     for(let r in responses){
       console.log(responses[r])
-      console.log("RESPONSE:"+pyth.web3.utils.toAscii(responses[r].returnValues['response']))
+      console.log("RESPONSE:"+concurrence.web3.utils.toAscii(responses[r].returnValues['response']))
     }
   })
 });

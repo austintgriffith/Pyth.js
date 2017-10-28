@@ -1,7 +1,7 @@
 const Request = require('request');
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
-  pyth.selectAccount(1)
-  pyth.startMining(10000)
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+  concurrence.selectAccount(1)
+  concurrence.startMining(10000)
 
 
   setInterval(()=>{

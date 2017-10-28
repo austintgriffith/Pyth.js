@@ -1,6 +1,6 @@
-require("../pyth.js")({},(err,pyth)=>{
-  pyth.selectAccount(1)
-  pyth.transfer(pyth.accounts[0],1).then((result)=>{
+require("../concurrence.js")({},(err,concurrence)=>{
+  concurrence.selectAccount(1)
+  concurrence.transfer(concurrence.accounts[0],1).then((result)=>{
     console.log(result.transactionHash)
   })
 });

@@ -14,9 +14,9 @@ let requestId = process.argv[3];
 
 let combinerAddress = fs.readFileSync("../../Combiner/basic/Combiner.address").toString().trim()
 
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
-  pyth.selectAccount(accountIndex)
-  pyth.combine(requestId,combinerAddress).then((result)=>{
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+  concurrence.selectAccount(accountIndex)
+  concurrence.combine(requestId,combinerAddress).then((result)=>{
     console.log(result)
     console.log(result.events.Debug)
     console.log(result.events.DebugGas)

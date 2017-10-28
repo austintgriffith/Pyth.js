@@ -4,8 +4,8 @@ if(!process.argv[2]){
 }
 let requestId = process.argv[2];
 
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
-  pyth.getHead(requestId).then((head)=>{
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+  concurrence.getHead(requestId).then((head)=>{
     console.log(head)
   })
 });

@@ -17,9 +17,9 @@ if(!process.argv[4]){
 }
 let response = process.argv[4];
 
-require("../pyth.js")({DEBUG: true},(err,pyth)=>{
-  pyth.selectAccount(accountIndex)
-  pyth.addResponse(requestId,response).then((result)=>{
+require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+  concurrence.selectAccount(accountIndex)
+  concurrence.addResponse(requestId,response).then((result)=>{
     console.log("TX:"+result.transactionHash)
     console.log(result.events.AddResponse.returnValues)
   })
