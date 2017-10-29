@@ -12,7 +12,7 @@ const Request = require('request')
 let concurrence = {
   version: "0.0.1",
   storage: "./.concurrence/",
-  server: "localhost",
+  server: "relay.concurrence.io",
   gas: 250000,
   gasPrice: 22,
   contracts: [],
@@ -21,7 +21,7 @@ let concurrence = {
   defaultParser: "raw",
   blocksPerRead: 10000,
   AMOUNT_TO_STAKE: 10,
-  DEBUG_MINER: false,
+  DEBUG_MINER: true,
   DEBUG_COMBINE: true,
   BUSY: false
 }

@@ -6,7 +6,7 @@ if(!process.argv[2]){
 let requestId = process.argv[2];
 
 require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
-console.log("Listing responses with to request:"+requestId)
+console.log("Listing responses to request:"+requestId)
   concurrence.listResponses(requestId).then((responses)=>{
     for(let r in responses){
       console.log(responses[r])
