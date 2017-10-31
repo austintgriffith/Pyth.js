@@ -189,7 +189,6 @@ concurrence.listStakes = (address)=>{
 concurrence.addRequest = (combiner,request,protocol,callback)=>{
   request=JSON.stringify(request)
   if(concurrence.config.DEBUG) console.log("Creating request \""+request+"\" parsed with \""+parser+"\" to combiner "+combiner)
-  console.log( concurrence.contracts["Requests"].interface.methods )
   //address _combiner, string _request, bytes32 _protocol, address _callback
   return concurrence.contracts["Requests"].interface.methods.addRequest(
     combiner,request,concurrence.web3.utils.fromAscii(protocol),callback
@@ -202,7 +201,7 @@ concurrence.addRequest = (combiner,request,protocol,callback)=>{
 
 //this gets the list every time by whaling the local blockchain
 //it would probably be better to fire off a thread that runs down
-//the chain just once and then keeps up with the latest blocks 
+//the chain just once and then keeps up with the latest blocks
 concurrence.listRequests = ()=>{
   return concurrence.contracts["Requests"].interface.getPastEvents('AddRequest',{
       fromBlock: concurrence.contracts["Requests"].blockNumber,
@@ -216,6 +215,10 @@ concurrence.getRequest = (requestId)=>{
 
 concurrence.getCombiner = (requestId)=>{
   return concurrence.contracts["Requests"].interface.methods.getCombiner(requestId).call()
+}
+
+concurrence.getCallback = (requestId)=>{
+  return concurrence.contracts["Requests"].interface.methods.getCallback(requestId).call()
 }
 
 
@@ -282,7 +285,7 @@ function combineRequest(requestId){
   try{
     concurrence.combine(requestId,concurrence.requests[requestId].combiner).on('error',(err)=>{
       console.log("ERROR",err)
-        concurrence.blacklist.push(requestId)
+      concurrence.blacklist.push(requestId)
       clearRequestOutOfCombineQueue(requestId)
     }).then((result)=>{
       if(concurrence.DEBUG_COMBINE) console.log(" ### COMBINE BACK:",result.transactionHash)
@@ -308,6 +311,7 @@ function clearRequestOutOfCombineQueue(requestId){
 
 concurrence.combine = (requestid,address)=>{
   if(!concurrence.combinerContracts[address]) loadCombiner(address)
+  if(concurrence.DEBUG_COMBINE) console.log(" # ### COMBINING: "+requestid+" in "+address)
   return concurrence.combinerContracts[address].methods.combine(requestid).send({
     from: concurrence.selectedAddress,
     gas: concurrence.gas,

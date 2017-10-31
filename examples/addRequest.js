@@ -1,12 +1,9 @@
 const fs = require("fs")
 
-let request = {
-  url: "http://relay.concurrence.io/address/Main"
-}
+let request = { url: "http://relay.concurrence.io/time" }
 let protocol = "raw"
 let combiner = fs.readFileSync("../../Combiner/basic/Combiner.address").toString().trim()
-let callback = "0x0"
-
+let callback = fs.readFileSync("../../Callback/Callback.address").toString().trim()
 
 let concurrence = require("../concurrence.js")
 concurrence.init({},(err)=>{
