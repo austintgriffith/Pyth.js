@@ -8,7 +8,8 @@ let requestId = process.argv[2];
 const fs = require("fs")
 let combinerAddress = fs.readFileSync("../../Combiner/basic/Combiner.address").toString().trim()
 
-require("../concurrence.js")({},(err,concurrence)=>{
+let concurrence = require("../concurrence.js")
+concurrence.init({},(err)=>{
   concurrence.isCombinerOpen(requestId,combinerAddress).then((open)=>{
     console.log("COMBINER OPEN: "+open)
     concurrence.isCombinerReady(requestId,combinerAddress).then((ready)=>{

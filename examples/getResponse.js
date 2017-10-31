@@ -4,7 +4,8 @@ if(!process.argv[2]){
 }
 let responseId = process.argv[2];
 
-require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+let concurrence = require("../concurrence.js")
+concurrence.init({},(err)=>{
   concurrence.getResponse(responseId).then((response)=>{
     console.log(response)
   })

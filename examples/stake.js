@@ -22,12 +22,10 @@ if(!process.argv[5]){
 }
 let tokens = process.argv[5];
 
-require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
-
+let concurrence = require("../concurrence.js")
+concurrence.init({},(err)=>{
   concurrence.selectAccount(accountIndex)
-
   concurrence.stake (requestId,responseId,tokens).then((result)=>{
     console.log(result)
   })
-
 });

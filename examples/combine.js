@@ -14,7 +14,8 @@ let requestId = process.argv[3];
 
 let combinerAddress = fs.readFileSync("../../Combiner/basic/Combiner.address").toString().trim()
 
-require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+let concurrence = require("../concurrence.js")
+concurrence.init({},(err)=>{
   concurrence.selectAccount(accountIndex)
   concurrence.combine(requestId,combinerAddress).then((result)=>{
     console.log(result)

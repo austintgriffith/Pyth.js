@@ -10,12 +10,10 @@ if(!process.argv[3]){
 }
 let responseId = process.argv[3];
 
-require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
-
+let concurrence = require("../concurrence.js")
+concurrence.init({},(err)=>{
   concurrence.selectAccount(1)
-
   concurrence.staked(concurrence.selectedAddress,requestId,responseId).then((staked)=>{
     console.log("Account "+concurrence.selectedAddress+" has "+staked+" PTH staked on response "+responseId+" to request "+requestId)
   })
-
 });

@@ -1,20 +1,14 @@
 {
-  "name": "concurrence.js",
-  "version": "1.0.0",
+  "name": "concurrence",
+  "version": "0.0.1",
   "description": "Javascript library for interacting with Concurrence smart contract fleet",
   "main": "concurrence.js",
-  "directories": {
-    "example": "examples"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/austintgriffith/concurrence.js.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Austin Thomas Griffith <austin@concurrence.io> (http://concurrence.io)",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/austintgriffith/concurrence.js/issues"
   },

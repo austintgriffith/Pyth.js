@@ -12,7 +12,8 @@ if(!process.argv[3]){
 }
 let tokens = process.argv[3];
 
-require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+let concurrence = require("../concurrence.js")
+concurrence.init({},(err)=>{
   concurrence.selectAccount(1)
   concurrence.reserve(requestId,tokens).then((reserveResult)=>{
     console.log(reserveResult)

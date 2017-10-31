@@ -17,7 +17,8 @@ if(!process.argv[4]){
 }
 let response = process.argv[4];
 
-require("../concurrence.js")({DEBUG: true},(err,concurrence)=>{
+let concurrence = require("../concurrence.js")
+concurrence.init({},(err)=>{
   concurrence.selectAccount(accountIndex)
   concurrence.addResponse(requestId,response).then((result)=>{
     console.log("TX:"+result.transactionHash)

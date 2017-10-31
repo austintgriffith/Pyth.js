@@ -29,7 +29,7 @@ let concurrence = {
 
 /// --- INIT ------------------------------------------------------------------------
 
-module.exports = function(config,callback){
+concurrence.init = function(config,callback){
   concurrence.config = config
 
   if(concurrence.config.DEBUG) console.log("Initializing storage...")
@@ -52,7 +52,7 @@ module.exports = function(config,callback){
   }).then(()=>{
     concurrence.contracts["Token"].interface.methods.symbol().call().then((symbol)=>{
       concurrence.symbol = symbol;
-      callback(null,concurrence);
+      callback(null);
     })
   }).catch((err)=>{
     if(concurrence.config.DEBUG) console.log("\n!!!!!!!!!!!!!\n",err,"!!!!!!!!!\n")
@@ -60,6 +60,8 @@ module.exports = function(config,callback){
   })
 
 }
+
+module.exports = concurrence
 
 /// --- MINER ------------------------------------------------------------------------
 
@@ -184,18 +186,23 @@ concurrence.listStakes = (address)=>{
 
 /// --- REQUESTS ------------------------------------------------------------------------
 
-concurrence.addRequest = (request,parser,combiner)=>{
+concurrence.addRequest = (combiner,request,protocol,callback)=>{
   request=JSON.stringify(request)
-  parser=JSON.stringify(parser)
   if(concurrence.config.DEBUG) console.log("Creating request \""+request+"\" parsed with \""+parser+"\" to combiner "+combiner)
-  console.log( concurrence.contracts["Requests"].interface.methods)
-  return concurrence.contracts["Requests"].interface.methods.addRequest(combiner,request,parser).send({
+  console.log( concurrence.contracts["Requests"].interface.methods )
+  //address _combiner, string _request, bytes32 _protocol, address _callback
+  return concurrence.contracts["Requests"].interface.methods.addRequest(
+    combiner,request,concurrence.web3.utils.fromAscii(protocol),callback
+  ).send({
     from: concurrence.selectedAddress,
     gas: concurrence.gas,
     gasPrice: concurrence.web3.utils.toWei(concurrence.gasPrice,'gwei')
   })
 }
 
+//this gets the list every time by whaling the local blockchain
+//it would probably be better to fire off a thread that runs down
+//the chain just once and then keeps up with the latest blocks 
 concurrence.listRequests = ()=>{
   return concurrence.contracts["Requests"].interface.getPastEvents('AddRequest',{
       fromBlock: concurrence.contracts["Requests"].blockNumber,

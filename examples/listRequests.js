@@ -1,4 +1,5 @@
-require("../concurrence.js")({},(err,concurrence)=>{
+let concurrence = require("../concurrence.js")
+concurrence.init({},(err)=>{
   concurrence.listRequests().then((requests)=>{
     console.log(requests)
   })

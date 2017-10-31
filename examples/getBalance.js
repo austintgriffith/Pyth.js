@@ -4,7 +4,8 @@ if(!process.argv[2]){
 }
 let accountIndex = process.argv[2];
 
-require("../concurrence.js")({},(err,concurrence)=>{
+let concurrence = require("../concurrence.js")
+concurrence.init({},(err)=>{
   console.log("Asking concurrence.js what my (etherbase) balance is...")
   concurrence.selectAccount(accountIndex)
   concurrence.balanceOf().then((balance)=>{
