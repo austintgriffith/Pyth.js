@@ -7,7 +7,7 @@
 
 const fs = require("fs")
 
-let request = { url: "http://relay.concurrence.io/time" }
+let request = { url: "http://relay.concurrence.io/email" }
 let protocol = "raw"
 let combiner = fs.readFileSync("../../Combiner/basic/Combiner.address").toString().trim()
 let callback = fs.readFileSync("../../Callback/Callback.address").toString().trim()
