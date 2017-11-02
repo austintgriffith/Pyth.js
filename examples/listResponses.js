@@ -1,3 +1,9 @@
+/*
+  List all the responses by events triggered
+
+  usage:
+  node listResponses ##REQUESTID##
+*/
 
 if(!process.argv[2]){
   console.log("Please provide a request id.")

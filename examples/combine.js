@@ -1,3 +1,15 @@
+/*
+  Run a loop of the Combiner
+  (this is where the concurrence is drawn, miners are rewarded, contracts are called back, etc)
+
+  usage:
+  node combine ##ACCOUNTINDEX## ##REQUESTID##
+
+  example:
+  node combine 5 0xd8293d3302f88fcc7f940ef5d00542416c46d89daaaf5c51aa14e0c89d45200b
+*/
+
+
 const fs = require("fs")
 
 if(!process.argv[2]){
@@ -19,8 +31,8 @@ concurrence.init({},(err)=>{
   concurrence.selectAccount(accountIndex)
   concurrence.combine(requestId,combinerAddress).then((result)=>{
     console.log(result)
-    console.log(result.events.Debug)
-    console.log(result.events.DebugGas)
-    console.log(result.events.DebugPointer)
+    concurrence.listDebug(result.events.Debug)
+    concurrence.listDebug(result.events.DebugGas)
+    concurrence.listDebug(result.events.DebugPointer)
   });
 });

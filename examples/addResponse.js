@@ -1,3 +1,12 @@
+/*
+  Add a response
+
+  usage:
+  node getResponse ##ACCOUNTINDEX## ##REQUESTID## ##RESPONSE##
+
+  example:
+  node addResponse 4 0xd3991a0876d16b0c97697a7d2954b0e63dbb3902047cc2712683392f06981654 "1509577541201"
+*/
 
 if(!process.argv[2]){
   console.log("Please provide an account index.")

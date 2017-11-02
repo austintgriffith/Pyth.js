@@ -1,3 +1,9 @@
+/*
+  Get balance of local account by index
+
+  usage:
+  node getBalance ##ACCOUNTINDEX##
+*/
 if(!process.argv[2]){
   console.log("Please provide an account index.")
   process.exit(1)

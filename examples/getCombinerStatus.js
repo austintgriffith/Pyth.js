@@ -1,4 +1,12 @@
+/*
+  Get status/mode/consensus of combiner for a request
 
+  usage:
+  node getcombinerStatus ##ACCOUNTINDEX##
+
+  example:
+  node getCombinerStatus.js 0x3bc605f10cfbc93f1310505869a3e66a025d84d6670d8dc279c305de6a596a21
+*/
 if(!process.argv[2]){
   console.log("Please provide a request id.")
   process.exit(1)
@@ -16,11 +24,13 @@ concurrence.init({},(err)=>{
       console.log("COMBINER READY: "+ready)
       concurrence.getCombinerMode(requestId,combinerAddress).then((result)=>{
         console.log("MODE:",result)
-        concurrence.getCombinerBestResult(requestId,combinerAddress).then((result)=>{
-          console.log("BEST RESULT:",concurrence.web3.utils.toAscii(result))
-          concurrence.getCombinerMostStaked(requestId,combinerAddress).then((result)=>{
-            console.log("MOST STAKED:",result)
-
+        concurrence.getCombinerConcurrence(requestId,combinerAddress).then((result)=>{
+          console.log("CONCURRENCE:",concurrence.web3.utils.toAscii(result))
+          concurrence.getCombinerWeight(requestId,combinerAddress).then((result)=>{
+            console.log("WEIGHT:",result)
+            //concurrence.getCombinerTimestamp(requestId,combinerAddress).then((result)=>{
+            //  console.log("TIMESTAMP:",result)
+            //});
           });
         });
       });
