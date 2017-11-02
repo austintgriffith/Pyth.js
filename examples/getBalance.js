@@ -12,7 +12,7 @@ let accountIndex = process.argv[2];
 
 let concurrence = require("../concurrence.js")
 concurrence.init({},(err)=>{
-  console.log("Asking concurrence.js what my (etherbase) balance is...")
+  console.log("Asking concurrence.js what balance is for account index ["+accountIndex+"]...")
   concurrence.selectAccount(accountIndex)
   concurrence.balanceOf().then((balance)=>{
     console.log("Balance: "+balance+" "+concurrence.symbol)

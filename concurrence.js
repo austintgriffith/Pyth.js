@@ -21,7 +21,7 @@ let concurrence = {
   version: "0.0.1",
   storage: "./.concurrence/",
   server: "relay.concurrence.io",
-  gas: 250000,
+  gas: 350000,
   gasPrice: 22,
   contracts: [],
   combinerContracts: [],
@@ -324,7 +324,7 @@ function clearRequestOutOfCombineQueue(requestId){
 
 concurrence.combine = (requestid,address)=>{
   if(!concurrence.combinerContracts[address]) loadCombiner(address)
-  if(concurrence.DEBUG_COMBINE) console.log(" # ### COMBINING: "+requestid+" in "+address)
+  if(concurrence.DEBUG_COMBINE) console.log(" # ### COMBINING: "+requestid+" in "+address+" with account index "+concurrence.selectedAddress)
   return concurrence.combinerContracts[address].methods.combine(requestid).send({
     from: concurrence.selectedAddress,
     gas: concurrence.gas,
