@@ -24,7 +24,7 @@ let tokens = process.argv[3];
 
 let concurrence = require("../concurrence.js")
 concurrence.init({},(err)=>{
-  concurrence.selectAccount(2)
+  concurrence.selectAccount(0)
   concurrence.reserve(requestId,tokens).then((reserveResult)=>{
     console.log(reserveResult)
   })

@@ -14,7 +14,7 @@ let callback = fs.readFileSync("../../Callback/Callback.address").toString().tri
 
 let concurrence = require("../concurrence.js")
 concurrence.init({},(err)=>{
-  concurrence.selectAccount(2)
+  concurrence.selectAccount(0)
   concurrence.addRequest(combiner,request,protocol,callback).then((addResult)=>{
     console.log("TX:"+addResult.transactionHash)
     console.log(addResult.events.AddRequest.returnValues)
