@@ -26,7 +26,7 @@ let concurrence = {
   contracts: [],
   combinerContracts: [],
   blacklist: [],
-  defaultParser: "raw",
+  defaultProtocol: "raw",
   blocksPerRead: 10000,
   AMOUNT_TO_STAKE: 10,
   DEBUG_MINER: true,
@@ -150,7 +150,7 @@ concurrence.balanceOf = (address)=>{
 }
 
 concurrence.transfer = (address,amount)=>{
-  if(concurrence.config.DEBUG) console.log("Transferring "+amount+""+concurrence.symbol+" from "+concurrence.selectedAddress+" to "+address+" ...")
+  if(concurrence.config.DEBUG) console.log("Transferring "+amount+" "+concurrence.symbol+" from "+concurrence.selectedAddress+" to "+address+" ...")
   return concurrence.contracts["Token"].interface.methods.transfer(address,amount).send({
     from: concurrence.selectedAddress,
     gas: concurrence.gas,
@@ -196,7 +196,7 @@ concurrence.listStakes = (address)=>{
 
 concurrence.addRequest = (combiner,request,protocol,callback)=>{
   request=JSON.stringify(request)
-  if(concurrence.config.DEBUG) console.log("Creating request \""+request+"\" parsed with \""+parser+"\" to combiner "+combiner)
+  if(concurrence.config.DEBUG) console.log("Creating request \""+request+"\" with protocol \""+protocol+"\" to combiner "+combiner)
   //address _combiner, string _request, bytes32 _protocol, address _callback
   return concurrence.contracts["Requests"].interface.methods.addRequest(
     combiner,request,concurrence.web3.utils.fromAscii(protocol),callback
@@ -434,7 +434,7 @@ function mineRequest(requestId){
   if(concurrence.DEBUG_MINER) console.log(" # ### MINING request "+requestId)
   try{
     let request = JSON.parse(concurrence.requests[requestId].request);
-    let parser = JSON.parse(concurrence.requests[requestId].parser)
+    let protocol = concurrence.requests[requestId].protocol
     if(concurrence.config.DEBUG) console.log(" ## URL: "+request.url)
     Request(request.url,(error, response, body)=>{
       if(concurrence.DEBUG_MINER) console.log(body);
