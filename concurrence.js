@@ -21,7 +21,7 @@ let concurrence = {
   version: "0.0.1",
   storage: "./.concurrence/",
   server: "relay.concurrence.io",
-  gas: 350000,
+  gas: 250000,
   gasPrice: 22,
   contracts: [],
   combinerContracts: [],
@@ -38,15 +38,17 @@ let concurrence = {
 /// --- INIT ------------------------------------------------------------------------
 
 concurrence.init = function(config,callback){
-  concurrence.config = config
+  for(let c in config){
+    concurrence[c] = config[c]
+  }
 
-  if(concurrence.config.DEBUG) console.log("Initializing storage...")
+  if(concurrence.DEBUG) console.log("Initializing storage...")
   initStorage()
 
-  if(concurrence.config.DEBUG) console.log("Connecting to Ethereum network...")
+  if(concurrence.DEBUG) console.log("Connecting to Ethereum network...")
   connectToEthereumNetwork()
 
-  if(concurrence.config.DEBUG) console.log("Loading accounts...")
+  if(concurrence.DEBUG) console.log("Loading accounts...")
   getAccounts().then(()=>{
     return loadContract("Main");
   }).then(()=>{
@@ -63,7 +65,7 @@ concurrence.init = function(config,callback){
       callback(null);
     })
   }).catch((err)=>{
-    if(concurrence.config.DEBUG) console.log("\n!!!!!!!!!!!!!\n",err,"!!!!!!!!!\n")
+    if(concurrence.DEBUG) console.log("\n!!!!!!!!!!!!!\n",err,"!!!!!!!!!\n")
     callback(err);
   })
 
@@ -82,10 +84,10 @@ concurrence.startMining = (interval) => {
   //mine interval
   setInterval(()=>{
     if(!concurrence.BUSY){
-      if(concurrence.config.DEBUG) console.log("#*")
+      if(concurrence.DEBUG) console.log("#*")
       for(let i in concurrence.mineQueue){
         let requestToMine = concurrence.mineQueue[i]
-        if(concurrence.config.DEBUG) console.log("#* MINE REQUEST: "+requestToMine+"")
+        if(concurrence.DEBUG) console.log("#* MINE REQUEST: "+requestToMine+"")
         concurrence.BUSY = requestToMine
         mineRequest(concurrence.BUSY)
         break
@@ -95,10 +97,10 @@ concurrence.startMining = (interval) => {
   //combine interval
   setInterval(()=>{
     if(!concurrence.BUSY){
-      if(concurrence.config.DEBUG) console.log("#%")
+      if(concurrence.DEBUG) console.log("#%")
       for(let i in concurrence.combineQueue){
         let requestToCombine = concurrence.combineQueue[i]
-        if(concurrence.config.DEBUG) console.log("#% COMBINE REQUEST: "+requestToCombine+"")
+        if(concurrence.DEBUG) console.log("#% COMBINE REQUEST: "+requestToCombine+"")
         concurrence.BUSY = requestToCombine
         combineRequest(concurrence.BUSY)
         break
@@ -145,12 +147,12 @@ concurrence.balanceOf = (address)=>{
   if(typeof address == "undefined"){
     address=concurrence.selectedAddress
   }
-  if(concurrence.config.DEBUG) console.log("Getting "+concurrence.symbol+" balance of address "+address+" ...")
+  if(concurrence.DEBUG) console.log("Getting "+concurrence.symbol+" balance of address "+address+" ...")
   return concurrence.contracts["Token"].interface.methods.balanceOf(address).call()
 }
 
 concurrence.transfer = (address,amount)=>{
-  if(concurrence.config.DEBUG) console.log("Transferring "+amount+" "+concurrence.symbol+" from "+concurrence.selectedAddress+" to "+address+" ...")
+  if(concurrence.DEBUG) console.log("Transferring "+amount+" "+concurrence.symbol+" from "+concurrence.selectedAddress+" to "+address+" ...")
   return concurrence.contracts["Token"].interface.methods.transfer(address,amount).send({
     from: concurrence.selectedAddress,
     gas: concurrence.gas,
@@ -163,7 +165,7 @@ concurrence.reserved = (requestId)=>{
 }
 
 concurrence.reserve = (requestId,amount)=>{
-  if(concurrence.config.DEBUG) console.log("Reserving "+amount+" "+concurrence.symbol+" for request id "+requestId+" ...")
+  if(concurrence.DEBUG) console.log("Reserving "+amount+" "+concurrence.symbol+" for request id "+requestId+" ...")
   return concurrence.contracts["Token"].interface.methods.reserve(requestId,amount).send({
     from: concurrence.selectedAddress,
     gas: concurrence.gas,
@@ -176,7 +178,7 @@ concurrence.staked = (address,requestId,responseId)=>{
 }
 
 concurrence.stake = (requestId,responseId,amount)=>{
-  if(concurrence.config.DEBUG) console.log("Staking "+amount+" "+concurrence.symbol+" on response id "+responseId+" (in request "+requestId+") from account "+concurrence.selectedAddress+" ...")
+  if(concurrence.DEBUG) console.log("Staking "+amount+" "+concurrence.symbol+" on response id "+responseId+" (in request "+requestId+") from account "+concurrence.selectedAddress+" ...")
   return concurrence.contracts["Token"].interface.methods.stake(requestId,responseId,amount).send({
     from: concurrence.selectedAddress,
     gas: concurrence.gas,
@@ -196,7 +198,7 @@ concurrence.listStakes = (address)=>{
 
 concurrence.addRequest = (combiner,request,protocol,callback)=>{
   request=JSON.stringify(request)
-  if(concurrence.config.DEBUG) console.log("Creating request \""+request+"\" with protocol \""+protocol+"\" to combiner "+combiner)
+  if(concurrence.DEBUG) console.log("Creating request \""+request+"\" with protocol \""+protocol+"\" to combiner "+combiner)
   //address _combiner, string _request, bytes32 _protocol, address _callback
   return concurrence.contracts["Requests"].interface.methods.addRequest(
     combiner,request,concurrence.web3.utils.fromAscii(protocol),callback
@@ -234,7 +236,7 @@ concurrence.getCallback = (requestId)=>{
 /// --- RESPONSE ------------------------------------------------------------------------
 
 concurrence.addResponse = (request,response)=>{
-  if(concurrence.config.DEBUG) console.log("Adding response to request id \""+request+"\": "+response)
+  if(concurrence.DEBUG) console.log("Adding response to request id \""+request+"\": "+response)
   return concurrence.contracts["Responses"].interface.methods.addResponse(request,concurrence.web3.utils.fromAscii(response)).send({
     from: concurrence.selectedAddress,
     gas: concurrence.gas,
@@ -348,7 +350,7 @@ concurrence.debugCombinerGas = (address)=>{
 }
 
 function loadCombiner(address){
-  if(concurrence.config.DEBUG) console.log("Loading Combiner "+address)
+  if(concurrence.DEBUG) console.log("Loading Combiner "+address)
   //combiner abi should probably be hardcoded in software, the should all be exactly the same
   try{
     let combinerAbi = JSON.parse(fs.readFileSync("../../Combiner/basic/Combiner.abi").toString().trim())
@@ -435,7 +437,7 @@ function mineRequest(requestId){
   try{
     let request = JSON.parse(concurrence.requests[requestId].request);
     let protocol = concurrence.requests[requestId].protocol
-    if(concurrence.config.DEBUG) console.log(" ## URL: "+request.url)
+    if(concurrence.DEBUG) console.log(" ## URL: "+request.url)
     Request(request.url,(error, response, body)=>{
       if(concurrence.DEBUG_MINER) console.log(body);
       concurrence.addResponse(requestId,body).on('error',(err)=>{
@@ -491,7 +493,7 @@ function checkForNewRequests(){
         count++
       }
     }
-    if(concurrence.config.DEBUG) console.log("# Synced "+count+" new requests out of "+total)
+    if(concurrence.DEBUG) console.log("# Synced "+count+" new requests out of "+total)
   })
 }
 
@@ -500,7 +502,7 @@ function getAccounts(){
     concurrence.web3.eth.getAccounts().then((accounts)=>{
       if(accounts) {
         concurrence.accounts=accounts
-        if(concurrence.config.DEBUG) console.log("Selecting default (coinbase) account...")
+        if(concurrence.DEBUG) console.log("Selecting default (coinbase) account...")
         concurrence.selectedAddress=accounts[0]
         resolve(accounts)
       }else{
@@ -523,16 +525,16 @@ function initStorage(){
 }
 
 function connectToEthereumNetwork(){
-  if(concurrence.config.IPC){
-    if(concurrence.config.DEBUG) console.log("Using IPC ("+config.IPC+") ...")
+  if(concurrence.IPC){
+    if(concurrence.DEBUG) console.log("Using IPC ("+config.IPC+") ...")
     connectionString = config.IPC// ex: '/Users/austingriffith/Library/Ethereum/testnet/geth.ipc'
     concurrence.web3 = new Web3(new Web3.providers.IpcProvider(connectionString, socketClient))
-  } else if(concurrence.config.RPC){
-    if(concurrence.config.DEBUG) console.log("Using RPC ("+config.RPC+") ...")
+  } else if(concurrence.RPC){
+    if(concurrence.DEBUG) console.log("Using RPC ("+config.RPC+") ...")
     connectionString = config.RPC// ex: "http://localhost:8545"
     concurrence.web3 = new Web3(new Web3.providers.HttpProvider(connectionString))
   } else {
-    if(concurrence.config.DEBUG) console.log("Using Default RPC...")
+    if(concurrence.DEBUG) console.log("Using Default RPC...")
     connectionString = "http://localhost:8545"
     concurrence.web3 = new Web3(new Web3.providers.HttpProvider(connectionString))
   }
@@ -540,12 +542,12 @@ function connectToEthereumNetwork(){
 
 function loadContract(name){
   return new Promise((resolve, reject) => {
-    if(concurrence.config.DEBUG) console.log("Loading contract "+name+" ...")
+    if(concurrence.DEBUG) console.log("Loading contract "+name+" ...")
     let address
     let abi
     //first, check to see if we can load the contract address from the main contract
     if(concurrence.contracts["Main"]){
-      if(concurrence.config.DEBUG) console.log("Connecting to Main contract to get "+name+" address ...")
+      if(concurrence.DEBUG) console.log("Connecting to Main contract to get "+name+" address ...")
       concurrence.contracts["Main"].interface.methods.getContract(
           concurrence.web3.utils.fromAscii(name)
         ).call().then((contractAddress)=>{
@@ -567,7 +569,7 @@ function loadContract(name){
       }catch(e){
         //finally, go to the webserver since can't find it anywhere locally
         let addressUrl = 'http://'+concurrence.server+'/address/'+name
-        if(concurrence.config.DEBUG) console.log("Connecting to "+addressUrl+" ...")
+        if(concurrence.DEBUG) console.log("Connecting to "+addressUrl+" ...")
         Request(addressUrl,(error, response, body)=>{
           if(error){
             reject("Failed to load "+name+" address from "+addressUrl+"!")
@@ -614,7 +616,7 @@ function loadContractAbi(name,address,callback){
     callback(null,abi)
   }catch(e){
     let abiUrl = 'http://'+concurrence.server+'/abi/'+name
-    if(concurrence.config.DEBUG) console.log("Connecting to "+abiUrl+" ...")
+    if(concurrence.DEBUG) console.log("Connecting to "+abiUrl+" ...")
     Request(abiUrl,(error, response, body)=>{
       if(!error){
         try{
@@ -635,7 +637,7 @@ function loadContractBlockNumber(name,address,callback){
     callback(null,blockNumber)
   }catch(e){
     let abiUrl = 'http://'+concurrence.server+'/blockNumber/'+name
-    if(concurrence.config.DEBUG) console.log("Connecting to "+abiUrl+" ...")
+    if(concurrence.DEBUG) console.log("Connecting to "+abiUrl+" ...")
     Request(abiUrl,(error, response, body)=>{
       if(!error){
         callback(null,body)
