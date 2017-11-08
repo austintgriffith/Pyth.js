@@ -11,14 +11,18 @@ const fs = require('fs')
 const Web3 = require('web3')
 const _ = require('lodash');
 const net = require('net')
-const socketClient = net.Socket()
+const socket =
+let socketClient
+if(net.Socket&&typeof net.Socket == "function"){
+  socketClient = net.Socket()
+}
 const Request = require('request')
 
 
 /// --- CONFIG ------------------------------------------------------------------------
 
 let concurrence = {
-  version: "0.0.1",
+  version: "0.0.4",
   storage: "./.concurrence/",
   server: "relay.concurrence.io",
   gas: 250000,
